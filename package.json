@@ -1,0 +1,23 @@
+{
+  "name": "esbuild-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "": "命令行式调用 & 支持转译 .ts",
+    "build:ts": "esbuild example/main.ts --bundle --minify --outfile=dist/main-ts.js",
+    "#": "---------",
+    "dev": "esbuild src/index.js --servedir=dist --bundle --outfile=dist/out.js --serve=8000 --loader:.js=jsx"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "esbuild": "^0.15.10",
+    "open": "^8.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "svgo": "^2.8.0"
+  }
+}
