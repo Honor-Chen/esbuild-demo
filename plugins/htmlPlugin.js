@@ -1,5 +1,5 @@
 import { writeFile } from 'node:fs/promises'
-import { join, parse } from 'node:path'
+import { join, basename } from 'node:path'
 
 const htmlPlugin = {
   name: 'esbuild:html',
@@ -8,10 +8,30 @@ const htmlPlugin = {
       if (buildResult.errors.length) return
 
       // 1：拿到 metafile 对象中所有的 .js / .css 产物路径
+      const { metafile } = buildResult
+
+      const scripts = []
+      const links = []
+      if (metafile) {
+        const { outputs } = metafile
+        const assets = Reflect.ownKeys(outputs)
+
+        assets.forEach((asset) => {
+          const _asset = `./${basename(asset)}`
+          if (asset.endsWith('.js')) {
+            scripts.push(createScript(_asset))
+          } else if (asset.endsWith('.css')) {
+            links.push(createLink(_asset))
+          }
+        })
+      }
 
       // 2：拼接 HTML 内容
+      const htmlContent = generateHTML(scripts, links)
 
       // 3：写入磁盘
+      const htmlPath = join(process.cwd(), 'dist/newIndex.html')
+      await writeFile(htmlPath, htmlContent)
 
       console.log('onEnd finished....')
     })
@@ -32,7 +52,6 @@ function generateHTML(scripts, links) {
   return `
 		<!DOCTYPE html>
 		<html lang="en">
-		
 		<head>
 			<meta charset="UTF-8">
 			<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -40,12 +59,10 @@ function generateHTML(scripts, links) {
 			<title>html-plugin 插件</title>
 			${links.join('\n')}
 		</head>
-		
 		<body>
 			<div id="root"></div>
 			${scripts.join('\n')}
 		</body>
-		
 		</html>
 	`
 }
